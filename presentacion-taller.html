@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Azure AI Agents — Workshop Immersion</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+:root {
+    --brand-primary: #0078D4;
+    --brand-primary-dark: #004578;
+    --brand-primary-light: #3DA2F5;
+    --brand-primary-rgb: 0, 120, 212;
+    --brand-secondary: #50E6FF;
+    --brand-secondary-rgb: 80, 230, 255;
+    --brand-accent: #00B7C3;
+    --brand-accent-rgb: 0, 183, 195;
+    --brand-purple: #7B61FF;
+    --brand-green: #27AE60;
+    --bg-dark: #0F1B2D;
+    --bg-dark-2: #132238;
+    --bg-card: #1A2D44;
+    --bg-card-light: #1E3550;
+    --bg-light: #F3F6FC;
+    --bg-white: #FFFFFF;
+    --text-primary: #0F1B2D;
+    --text-secondary: #4A6280;
+    --text-light: #8BA3C0;
+    --text-white: #FFFFFF;
+    --text-white-muted: rgba(255,255,255,0.7);
+    --gradient-brand: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-accent) 100%);
+    --gradient-dark: linear-gradient(135deg, #0F1B2D 0%, #1A3A5C 100%);
+    --gradient-hero: linear-gradient(160deg, #040D1A 0%, #0F1B2D 30%, #0A2647 60%, #0078D4 100%);
+    --gradient-hero-text: linear-gradient(135deg, #FFFFFF 0%, var(--brand-secondary) 100%);
+    --shadow-lg: 0 20px 40px rgba(0,0,0,0.12);
+    --shadow-xl: 0 25px 60px rgba(0,0,0,0.2);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-pill: 50px;
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Source Sans 3', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 2rem;
+    --space-xl: 4rem;
+    --space-2xl: 6rem;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration-fast: 200ms;
+    --duration-normal: 350ms;
+    --duration-slow: 600ms;
+}
+
+body {
+    font-family: var(--font-body);
+    color: var(--text-primary);
+    background: var(--bg-white);
+    overflow-x: hidden;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+}
+h1 { font-size: clamp(2.5rem, 6vw, 5rem); }
+h2 { font-size: clamp(1.8rem, 4vw, 3rem); }
+h3 { font-size: clamp(1.2rem, 2.5vw, 1.8rem); }
+h4 { font-size: clamp(1rem, 1.5vw, 1.3rem); }
+p { font-size: clamp(0.95rem, 1.1vw, 1.1rem); }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 0 var(--space-lg); }
+
+/* ── Nav ── */
+nav {
+    position: fixed; top: 0; width: 100%; z-index: 1000;
+    background: rgba(15, 27, 45, 0.85);
+    backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+    border-bottom: 1px solid rgba(0,120,212,0.15);
+    transition: all 0.3s;
+}
+nav.scrolled { background: rgba(15, 27, 45, 0.96); box-shadow: 0 4px 30px rgba(0,0,0,0.3); }
+.nav-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.8rem var(--space-lg);
+}
+.nav-logo { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; }
+.nav-logo-icon {
+    width: 32px; height: 32px; background: var(--gradient-brand);
+    border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem;
+}
+.nav-logo-text { font-family: var(--font-display); font-weight: 600; font-size: 0.95rem; color: var(--text-white); }
+.nav-links { display: flex; gap: var(--space-lg); list-style: none; }
+.nav-links a {
+    color: var(--text-white-muted); text-decoration: none; font-size: 0.85rem;
+    font-weight: 500; transition: color var(--duration-fast); font-family: var(--font-display);
+}
+.nav-links a:hover { color: var(--brand-secondary); }
+@media (max-width: 768px) { .nav-links { display: none; } }
+
+/* ── Reveal ── */
+.reveal {
+    opacity: 0; transform: translateY(40px);
+    transition: opacity var(--duration-slow) var(--ease-out), transform var(--duration-slow) var(--ease-out);
+}
+.reveal.active { opacity: 1; transform: translateY(0); }
+.stagger > * { opacity: 0; transform: translateY(30px); transition: all var(--duration-slow) var(--ease-out); }
+.stagger.active > *:nth-child(1) { transition-delay: 0ms; }
+.stagger.active > *:nth-child(2) { transition-delay: 80ms; }
+.stagger.active > *:nth-child(3) { transition-delay: 160ms; }
+.stagger.active > *:nth-child(4) { transition-delay: 240ms; }
+.stagger.active > *:nth-child(5) { transition-delay: 320ms; }
+.stagger.active > *:nth-child(6) { transition-delay: 400ms; }
+.stagger.active > *:nth-child(7) { transition-delay: 480ms; }
+.stagger.active > *:nth-child(8) { transition-delay: 560ms; }
+.stagger.active > *:nth-child(9) { transition-delay: 640ms; }
+.stagger.active > * { opacity: 1; transform: translateY(0); }
+
+.section-badge {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.35rem 1rem; border-radius: var(--radius-pill);
+    font-size: 0.75rem; font-weight: 600; font-family: var(--font-display);
+    text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: var(--space-md);
+}
+.badge-dark { background: rgba(0,120,212,0.12); color: var(--brand-secondary); border: 1px solid rgba(80,230,255,0.2); }
+.badge-light { background: rgba(0,120,212,0.08); color: var(--brand-primary); border: 1px solid rgba(0,120,212,0.15); }
+
+/* ═══ HERO ═══ */
+.hero {
+    min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
+    align-items: center; text-align: center; position: relative; overflow: hidden;
+    background: var(--gradient-hero); padding: var(--space-2xl) var(--space-lg);
+}
+.hero::before {
+    content: ''; position: absolute; width: 800px; height: 800px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,120,212,0.12) 0%, transparent 70%);
+    top: -300px; right: -200px; pointer-events: none; animation: float-orb 20s ease-in-out infinite;
+}
+.hero::after {
+    content: ''; position: absolute; width: 600px; height: 600px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,183,195,0.08) 0%, transparent 70%);
+    bottom: -200px; left: -150px; pointer-events: none; animation: float-orb 25s ease-in-out infinite reverse;
+}
+@keyframes float-orb {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    33% { transform: translateY(-30px) rotate(3deg); }
+    66% { transform: translateY(15px) rotate(-2deg); }
+}
+.hero-grid {
+    position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(0,120,212,0.04) 1px, transparent 1px),
+                       linear-gradient(90deg, rgba(0,120,212,0.04) 1px, transparent 1px);
+    background-size: 60px 60px; pointer-events: none;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+}
+.hero-content { position: relative; z-index: 2; max-width: 900px; }
+.hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.4rem 1.2rem; border-radius: var(--radius-pill);
+    background: rgba(0,120,212,0.15); border: 1px solid rgba(80,230,255,0.2);
+    color: var(--brand-secondary); font-size: 0.8rem; font-weight: 600;
+    font-family: var(--font-display); letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: var(--space-lg);
+}
+.hero h1 {
+    background: var(--gradient-hero-text); -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: var(--space-md); letter-spacing: -0.04em;
+}
+.hero-subtitle {
+    font-size: clamp(1.1rem, 1.8vw, 1.4rem); color: var(--text-white-muted);
+    max-width: 650px; margin: 0 auto var(--space-xl); font-weight: 300; line-height: 1.6;
+}
+.hero-stats { display: flex; justify-content: center; gap: var(--space-xl); flex-wrap: wrap; }
+.hero-stat { text-align: center; }
+.hero-stat .number {
+    font-family: var(--font-display); font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700; color: var(--brand-secondary); line-height: 1;
+}
+.hero-stat .label { font-size: 0.8rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.3rem; }
+
+/* ═══ SPLIT ═══ */
+.section-split { display: grid; grid-template-columns: 1fr 1fr; min-height: 80vh; align-items: center; background: var(--bg-light); }
+.split-content { padding: var(--space-2xl); }
+.split-content h2 { color: var(--text-primary); margin-bottom: var(--space-md); }
+.split-content p { color: var(--text-secondary); margin-bottom: var(--space-lg); }
+.split-visual {
+    position: relative; display: flex; align-items: center; justify-content: center;
+    min-height: 100%; background: var(--gradient-dark); padding: var(--space-xl); overflow: hidden;
+}
+.agent-diagram { position: relative; z-index: 2; width: 100%; max-width: 420px; }
+.agent-core {
+    background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent));
+    border-radius: var(--radius-xl); padding: var(--space-lg); text-align: center;
+    color: white; margin-bottom: var(--space-lg); box-shadow: 0 10px 40px rgba(0,120,212,0.3);
+}
+.agent-core h3 { font-size: 1.3rem; margin-bottom: 0.3rem; }
+.agent-core p { font-size: 0.85rem; opacity: 0.85; }
+.agent-tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-sm); }
+.agent-tool-chip {
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(80,230,255,0.15);
+    border-radius: var(--radius-md); padding: 0.6rem 0.4rem; text-align: center;
+    color: var(--text-white-muted); font-size: 0.7rem; font-weight: 500; font-family: var(--font-display);
+    transition: all var(--duration-normal) var(--ease-out);
+}
+.agent-tool-chip:hover { background: rgba(0,120,212,0.15); border-color: var(--brand-secondary); color: var(--brand-secondary); transform: translateY(-3px); }
+.agent-tool-chip .icon { display: block; font-size: 1.3rem; margin-bottom: 0.2rem; }
+.feature-list { list-style: none; display: flex; flex-direction: column; gap: var(--space-md); }
+.feature-list li { display: flex; align-items: flex-start; gap: 0.8rem; font-size: 1rem; color: var(--text-secondary); }
+.feature-list .check { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; background: rgba(0,120,212,0.1); color: var(--brand-primary); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; margin-top: 2px; }
+@media (max-width: 768px) { .section-split { grid-template-columns: 1fr; } .split-visual { min-height: 400px; } }
+
+/* ═══ BENTO ═══ */
+.section-bento { background: var(--bg-dark); color: var(--text-white); padding: var(--space-2xl) 0; }
+.section-bento h2 { color: white; }
+.bento-grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: minmax(180px, auto); gap: var(--space-md); margin-top: var(--space-xl); }
+.bento-item { border-radius: var(--radius-lg); padding: var(--space-lg); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; transition: transform var(--duration-normal) var(--ease-out); }
+.bento-item:hover { transform: translateY(-4px); }
+.bento-item--code { grid-column: span 2; grid-row: span 2; background: var(--bg-card); border: 1px solid rgba(0,120,212,0.15); }
+.bento-item--step { background: var(--bg-card); border: 1px solid rgba(0,120,212,0.1); }
+.bento-step-num { font-family: var(--font-display); font-size: 2.5rem; font-weight: 700; background: var(--gradient-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1; margin-bottom: 0.5rem; }
+.bento-item h4 { color: white; margin-bottom: 0.3rem; }
+.bento-item p { color: var(--text-light); font-size: 0.85rem; line-height: 1.5; }
+.code-block { background: #0A1628; border-radius: var(--radius-md); padding: var(--space-md); font-family: var(--font-mono); font-size: 0.72rem; line-height: 1.7; color: #C8D6E5; overflow-x: auto; border: 1px solid rgba(0,120,212,0.1); white-space: pre; }
+.code-block .kw { color: var(--brand-secondary); }
+.code-block .str { color: #27AE60; }
+.code-block .fn { color: #F5A623; }
+.code-block .cm { color: #5A7A9A; }
+@media (max-width: 768px) { .bento-grid { grid-template-columns: 1fr; } .bento-item--code { grid-column: span 1; grid-row: span 1; } }
+
+/* ═══ STEPPER ═══ */
+.section-stepper { background: var(--bg-light); padding: var(--space-2xl) 0; overflow-x: hidden; }
+.stepper-wrapper { margin-top: var(--space-xl); overflow-x: auto; padding-bottom: var(--space-lg); -webkit-overflow-scrolling: touch; }
+.stepper { display: flex; align-items: flex-start; position: relative; min-width: 1100px; padding: 0 var(--space-lg); }
+.stepper::before { content: ''; position: absolute; top: 28px; left: 60px; right: 60px; height: 3px; background: linear-gradient(90deg, var(--brand-primary), var(--brand-accent), var(--brand-purple)); border-radius: 2px; }
+.step { flex: 1; text-align: center; position: relative; z-index: 2; padding: 0 0.3rem; }
+.step-number { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; margin: 0 auto var(--space-sm); transition: all var(--duration-normal) var(--ease-out); color: white; }
+.step:hover .step-number { transform: scale(1.15); }
+.step-number--blue { background: var(--brand-primary); box-shadow: 0 4px 20px rgba(0,120,212,0.3); }
+.step-number--teal { background: var(--brand-accent); box-shadow: 0 4px 20px rgba(0,183,195,0.3); }
+.step-number--purple { background: var(--brand-purple); box-shadow: 0 4px 20px rgba(123,97,255,0.3); }
+.step-number--green { background: var(--brand-green); box-shadow: 0 4px 20px rgba(39,174,96,0.3); }
+.step h4 { font-size: 0.75rem; color: var(--text-primary); margin-bottom: 0.2rem; line-height: 1.3; }
+.step p { font-size: 0.65rem; color: var(--text-secondary); line-height: 1.4; }
+.step-level { font-size: 0.7rem; margin-top: 0.3rem; color: var(--text-light); }
+
+/* ═══ MEGA NUMBERS ═══ */
+.section-mega { background: var(--bg-dark); color: var(--text-white); padding: var(--space-2xl) 0; position: relative; overflow: hidden; }
+.section-mega::before { content: ''; position: absolute; width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, rgba(0,120,212,0.08) 0%, transparent 70%); top: -100px; left: -100px; pointer-events: none; }
+.mega-header { text-align: center; margin-bottom: var(--space-xl); }
+.mega-header h2 { color: white; }
+.mega-numbers { display: flex; justify-content: space-around; align-items: flex-start; flex-wrap: wrap; gap: var(--space-xl); text-align: center; margin-bottom: var(--space-xl); }
+.mega-stat { flex: 1 1 200px; }
+.mega-stat .number { font-family: var(--font-display); font-size: clamp(2.5rem, 6vw, 4rem); line-height: 1; }
+.mega-stat .label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-light); margin-top: var(--space-sm); }
+.mega-stat .desc { font-size: 0.85rem; color: var(--text-white-muted); margin-top: 0.4rem; max-width: 220px; margin-left: auto; margin-right: auto; }
+.mega-stat + .mega-stat { border-left: 1px solid rgba(0,120,212,0.15); padding-left: var(--space-xl); }
+@media (max-width: 768px) { .mega-stat + .mega-stat { border-left: none; padding-left: 0; border-top: 1px solid rgba(0,120,212,0.15); padding-top: var(--space-lg); } }
+.labs-detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-lg); }
+.lab-detail-card { border-left: 3px solid var(--brand-primary); padding-left: var(--space-md); }
+.lab-detail-card h4 { color: var(--brand-secondary); font-size: 1rem; margin-bottom: 0.3rem; }
+.lab-detail-card p { color: var(--text-white-muted); font-size: 0.85rem; line-height: 1.5; }
+.lab-detail-card .tool-tag { display: inline-block; padding: 0.15rem 0.6rem; background: rgba(0,120,212,0.15); border-radius: var(--radius-pill); font-size: 0.7rem; color: var(--brand-secondary); font-family: var(--font-mono); margin-top: 0.5rem; }
+@media (max-width: 768px) { .labs-detail-grid { grid-template-columns: 1fr; } }
+
+/* ═══ ZIGZAG ═══ */
+.section-zigzag { background: var(--bg-white); padding: var(--space-2xl) 0; }
+.zigzag-wrapper { position: relative; margin-top: var(--space-xl); }
+.zigzag-item { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); align-items: center; padding: var(--space-xl) 0; }
+.zigzag-item:nth-child(even) { direction: rtl; }
+.zigzag-item:nth-child(even) > * { direction: ltr; }
+.zigzag-visual { border-radius: var(--radius-xl); overflow: hidden; aspect-ratio: 4/3; position: relative; display: flex; align-items: center; justify-content: center; padding: var(--space-lg); }
+.zigzag-visual--bing { background: linear-gradient(135deg, #0F1B2D, #1A3A5C); }
+.zigzag-visual--search { background: linear-gradient(135deg, #0A2647, #0078D4); }
+.zigzag-visual-content { text-align: center; color: white; z-index: 2; }
+.zigzag-visual-content .visual-icon { font-size: 3rem; margin-bottom: var(--space-sm); }
+.zigzag-visual-content h4 { font-size: 1.1rem; color: white; margin-bottom: 0.3rem; }
+.zigzag-visual-content p { font-size: 0.8rem; color: var(--text-white-muted); }
+.zigzag-content h3 { color: var(--text-primary); margin-bottom: var(--space-sm); }
+.zigzag-content p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+.tag-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.tag { padding: 0.25rem 0.8rem; border-radius: var(--radius-pill); font-size: 0.75rem; font-weight: 600; font-family: var(--font-display); }
+.tag--blue { background: rgba(0,120,212,0.1); color: var(--brand-primary); }
+.tag--teal { background: rgba(0,183,195,0.1); color: var(--brand-accent); }
+.tag--purple { background: rgba(123,97,255,0.1); color: var(--brand-purple); }
+@media (max-width: 768px) { .zigzag-item { grid-template-columns: 1fr; } .zigzag-item:nth-child(even) { direction: ltr; } }
+
+/* ═══ LAYERS ═══ */
+.section-layers { background: var(--bg-dark); color: var(--text-white); padding: var(--space-2xl) 0; }
+.layer-stack { display: flex; flex-direction: column; align-items: center; gap: 0; margin-top: var(--space-xl); max-width: 800px; margin-left: auto; margin-right: auto; }
+.layer { width: 100%; padding: var(--space-lg) var(--space-xl); border-radius: var(--radius-lg); position: relative; transition: transform var(--duration-normal) var(--ease-out); display: flex; align-items: center; gap: var(--space-md); margin-bottom: -6px; }
+.layer:hover { transform: translateY(-4px) scale(1.01); }
+.layer:nth-child(1) { z-index: 5; width: 100%; background: var(--brand-primary); }
+.layer:nth-child(2) { z-index: 4; width: 96%; background: rgba(0,120,212,0.7); }
+.layer:nth-child(3) { z-index: 3; width: 92%; background: rgba(0,120,212,0.5); }
+.layer:nth-child(4) { z-index: 2; width: 88%; background: rgba(0,120,212,0.35); }
+.layer:nth-child(5) { z-index: 1; width: 84%; background: rgba(0,120,212,0.2); border: 1px solid rgba(0,120,212,0.2); }
+.layer-icon { font-size: 1.5rem; flex-shrink: 0; }
+.layer-text h4 { color: white; font-size: 1rem; margin-bottom: 0.15rem; }
+.layer-text p { color: rgba(255,255,255,0.75); font-size: 0.8rem; }
+.orchestration-info { max-width: 800px; margin: var(--space-xl) auto 0; display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg); }
+.orch-card { padding: var(--space-lg); border-radius: var(--radius-md); border: 1px solid rgba(0,120,212,0.15); background: rgba(0,120,212,0.05); }
+.orch-card h4 { color: var(--brand-secondary); margin-bottom: 0.3rem; font-size: 0.95rem; }
+.orch-card p { color: var(--text-white-muted); font-size: 0.85rem; }
+@media (max-width: 768px) { .orchestration-info { grid-template-columns: 1fr; } }
+
+/* ═══ DASHBOARD ═══ */
+.section-dashboard { background: var(--bg-light); padding: var(--space-2xl) 0; }
+.dashboard-grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: minmax(160px, auto); gap: var(--space-md); margin-top: var(--space-xl); }
+.dash-cell { padding: var(--space-lg); border-radius: var(--radius-md); background: var(--bg-white); border: 1px solid rgba(0,120,212,0.08); transition: all var(--duration-normal) var(--ease-out); }
+.dash-cell:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+.dash-cell--highlight { background: var(--gradient-dark); color: white; grid-column: span 2; border: none; }
+.dash-cell .cell-icon { font-size: 1.8rem; margin-bottom: var(--space-sm); }
+.dash-cell h4 { color: var(--text-primary); margin-bottom: 0.3rem; font-size: 1rem; }
+.dash-cell p { color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5; }
+.dash-cell--highlight h4 { color: var(--brand-secondary); }
+.dash-cell--highlight p { color: var(--text-white-muted); }
+.dash-cell--accent { background: var(--gradient-brand); color: white; border: none; }
+.dash-cell--accent h4 { color: white; }
+.dash-cell--accent p { color: rgba(255,255,255,0.85); }
+.mini-bars { display: flex; align-items: flex-end; gap: 4px; height: 50px; margin-top: var(--space-sm); }
+.mini-bars .bar { flex: 1; border-radius: 3px 3px 0 0; }
+.mini-bars .bar:nth-child(1) { height: 30%; background: rgba(0,120,212,0.4); }
+.mini-bars .bar:nth-child(2) { height: 55%; background: rgba(0,120,212,0.55); }
+.mini-bars .bar:nth-child(3) { height: 45%; background: rgba(0,120,212,0.5); }
+.mini-bars .bar:nth-child(4) { height: 80%; background: rgba(0,120,212,0.7); }
+.mini-bars .bar:nth-child(5) { height: 65%; background: rgba(0,120,212,0.6); }
+.mini-bars .bar:nth-child(6) { height: 95%; background: var(--brand-primary); }
+@media (max-width: 768px) { .dashboard-grid { grid-template-columns: 1fr; } .dash-cell--highlight { grid-column: span 1; } }
+
+/* ═══ CTA ═══ */
+.cta-final {
+    text-align: center; padding: var(--space-2xl); background: var(--gradient-hero);
+    color: white; min-height: 60vh; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; position: relative; overflow: hidden;
+}
+.cta-final::before { content: ''; position: absolute; width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(circle, rgba(80,230,255,0.06) 0%, transparent 70%); top: -200px; left: -200px; pointer-events: none; }
+.cta-final h2 { color: white; margin-bottom: var(--space-md); }
+.cta-final > .hero-content > p { color: var(--text-white-muted); max-width: 600px; margin-bottom: var(--space-xl); font-size: clamp(1rem, 1.3vw, 1.15rem); }
+.cta-buttons { display: flex; gap: var(--space-md); flex-wrap: wrap; justify-content: center; }
+.cta-button { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.9rem 2rem; border-radius: var(--radius-pill); font-size: 1rem; font-weight: 700; font-family: var(--font-display); text-decoration: none; transition: all var(--duration-normal) var(--ease-out); cursor: pointer; }
+.cta-button--primary { background: white; color: var(--brand-primary); border: none; }
+.cta-button--primary:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(255,255,255,0.2); }
+.cta-button--secondary { background: transparent; color: white; border: 2px solid rgba(255,255,255,0.4); }
+.cta-button--secondary:hover { background: rgba(255,255,255,0.1); border-color: white; }
+.cta-tech-stack { margin-top: var(--space-xl); display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; }
+.cta-tech { text-align: center; color: var(--text-white-muted); font-size: 0.75rem; font-family: var(--font-display); letter-spacing: 0.05em; }
+.cta-tech .icon { font-size: 1.5rem; display: block; margin-bottom: 0.2rem; }
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+    .reveal { opacity: 1; transform: none; }
+    .stagger > * { opacity: 1; transform: none; }
+}
+a:focus-visible, button:focus-visible { outline: 2px solid var(--brand-secondary); outline-offset: 3px; }
+</style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-inner">
+        <a href="#" class="nav-logo"><div class="nav-logo-icon">&#x1F916;</div><span class="nav-logo-text">Azure AI Agents</span></a>
+        <ul class="nav-links">
+            <li><a href="#que-es">Concepto</a></li>
+            <li><a href="#framework">Foundry + SDK</a></li>
+            <li><a href="#patron">Patrón</a></li>
+            <li><a href="#labs">Los 9 Labs</a></li>
+            <li><a href="#fundamentos">Fundamentos</a></li>
+            <li><a href="#busqueda">Búsqueda</a></li>
+            <li><a href="#orquestacion">Orquestación</a></li>
+            <li><a href="#maestria">Maestría</a></li>
+        </ul>
+    </div>
+</nav>
+
+<section class="hero" id="inicio">
+    <div class="hero-grid"></div>
+    <div class="hero-content reveal">
+        <div class="hero-badge">&#x1F680; Workshop Hands-On</div>
+        <h1>Azure AI Agents</h1>
+        <p class="hero-subtitle">Construye agentes inteligentes con Microsoft Foundry — desde tu primer chatbot hasta sistemas multi-agente con memoria y conocimiento distribuido.</p>
+        <div class="hero-stats stagger">
+            <div class="hero-stat"><div class="number" data-count="9">0</div><div class="label">Laboratorios</div></div>
+            <div class="hero-stat"><div class="number" data-count="6">0</div><div class="label">Herramientas</div></div>
+            <div class="hero-stat"><div class="number" data-count="4">0</div><div class="label">Niveles</div></div>
+        </div>
+    </div>
+</section>
+
+<section class="section-split" id="que-es">
+    <div class="split-content">
+        <div class="section-badge badge-light">&#x1F4A1; Concepto Clave</div>
+        <h2 class="reveal">¿Qué es un Agente de IA?</h2>
+        <p class="reveal">Un agente es un asistente inteligente con <strong>personalidad</strong> (instrucciones), <strong>cerebro</strong> (modelo LLM) y <strong>superpoderes</strong> (herramientas). Entiende preguntas, decide qué herramienta usar y responde con información contextual.</p>
+        <ul class="feature-list reveal stagger">
+            <li><span class="check">&#x2713;</span> <strong>Entiende</strong> lenguaje natural del usuario</li>
+            <li><span class="check">&#x2713;</span> <strong>Decide</strong> qué herramienta usar automáticamente</li>
+            <li><span class="check">&#x2713;</span> <strong>Ejecuta</strong> acciones: código, búsquedas, análisis</li>
+            <li><span class="check">&#x2713;</span> <strong>Responde</strong> con datos reales y citaciones</li>
+        </ul>
+    </div>
+    <div class="split-visual">
+        <div class="agent-diagram reveal">
+            <div class="agent-core"><h3>&#x1F916; Agente de IA</h3><p>Instrucciones + Modelo + Herramientas</p></div>
+            <div class="agent-tools stagger">
+                <div class="agent-tool-chip"><span class="icon">&#x1F40D;</span>Code Interpreter</div>
+                <div class="agent-tool-chip"><span class="icon">&#x1F4C4;</span>File Search</div>
+                <div class="agent-tool-chip"><span class="icon">&#x1F310;</span>Bing Search</div>
+                <div class="agent-tool-chip"><span class="icon">&#x1F50D;</span>AI Search</div>
+                <div class="agent-tool-chip"><span class="icon">&#x1F50C;</span>MCP Tools</div>
+                <div class="agent-tool-chip"><span class="icon">&#x1F9E0;</span>Memoria</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════ FOUNDRY AGENTS + AGENT FRAMEWORK SDK ═══════ -->
+<section style="background: var(--bg-dark); color: var(--text-white); padding: var(--space-2xl) 0; position: relative; overflow: hidden;" id="framework">
+    <div style="position: absolute; width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, rgba(0,183,195,0.07) 0%, transparent 70%); bottom: -200px; right: -100px; pointer-events: none;"></div>
+    <div class="container" style="position: relative; z-index: 2;">
+        <div class="section-badge badge-dark">&#x1F3D7;&#xFE0F; Plataforma</div>
+        <h2 class="reveal">Foundry Agents + Agent Framework SDK</h2>
+        <p class="reveal" style="color: var(--text-white-muted); max-width: 750px; margin-top: 0.5rem; margin-bottom: var(--space-lg); font-size: clamp(1rem, 1.2vw, 1.15rem); line-height: 1.7;">
+            El ecosistema de agentes de Microsoft tiene <strong style="color: var(--brand-secondary);">dos piezas clave</strong> que trabajan juntas:
+        </p>
+
+        <!-- Dos columnas: Foundry Agents vs Agent Framework SDK -->
+        <div class="reveal" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg); margin-bottom: var(--space-xl); max-width: 900px;">
+            <div style="padding: var(--space-lg); border-radius: var(--radius-lg); background: rgba(0,120,212,0.08); border: 1px solid rgba(0,120,212,0.2);">
+                <div style="font-size: 2rem; margin-bottom: var(--space-sm);">&#x2601;&#xFE0F;</div>
+                <h3 style="color: var(--brand-secondary); font-size: 1.2rem; margin-bottom: 0.5rem;">Foundry Agents</h3>
+                <p style="font-size: 0.88rem; color: var(--text-white-muted); line-height: 1.6; margin-bottom: var(--space-md);">
+                    Es el <strong style="color: white;">servicio en la nube</strong> dentro de Azure AI Foundry que hospeda, ejecuta y escala tus agentes. Tú le dices qué hacer — él se encarga de correr el modelo, las herramientas y las conversaciones.
+                </p>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+                    <span style="padding: 0.15rem 0.6rem; background: rgba(0,120,212,0.15); border-radius: 50px; font-size: 0.7rem; color: var(--brand-secondary); font-family: var(--font-mono);">Hospedaje</span>
+                    <span style="padding: 0.15rem 0.6rem; background: rgba(0,120,212,0.15); border-radius: 50px; font-size: 0.7rem; color: var(--brand-secondary); font-family: var(--font-mono);">Tools</span>
+                    <span style="padding: 0.15rem 0.6rem; background: rgba(0,120,212,0.15); border-radius: 50px; font-size: 0.7rem; color: var(--brand-secondary); font-family: var(--font-mono);">Conversaciones</span>
+                    <span style="padding: 0.15rem 0.6rem; background: rgba(0,120,212,0.15); border-radius: 50px; font-size: 0.7rem; color: var(--brand-secondary); font-family: var(--font-mono);">Versionamiento</span>
+                </div>
+            </div>
+            <div style="padding: var(--space-lg); border-radius: var(--radius-lg); background: rgba(123,97,255,0.08); border: 1px solid rgba(123,97,255,0.2);">
+                <div style="font-size: 2rem; margin-bottom: var(--space-sm);">&#x1F4E6;</div>
+                <h3 style="color: #B8A5FF; font-size: 1.2rem; margin-bottom: 0.5rem;">Microsoft Agent Framework SDK</h3>
+                <p style="font-size: 0.88rem; color: var(--text-white-muted); line-height: 1.6; margin-bottom: var(--space-md);">
+                    Es el <strong style="color: white;">SDK open-source</strong> de Microsoft (Python / .NET) para construir agentes con más control programático: workflows, middleware, context providers, multi-agente y observabilidad.
+                </p>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+                    <span style="padding: 0.15rem 0.6rem; background: rgba(123,97,255,0.15); border-radius: 50px; font-size: 0.7rem; color: #B8A5FF; font-family: var(--font-mono);">Workflows</span>
+                    <span style="padding: 0.15rem 0.6rem; background: rgba(123,97,255,0.15); border-radius: 50px; font-size: 0.7rem; color: #B8A5FF; font-family: var(--font-mono);">Middleware</span>
+                    <span style="padding: 0.15rem 0.6rem; background: rgba(123,97,255,0.15); border-radius: 50px; font-size: 0.7rem; color: #B8A5FF; font-family: var(--font-mono);">Observability</span>
+                    <span style="padding: 0.15rem 0.6rem; background: rgba(123,97,255,0.15); border-radius: 50px; font-size: 0.7rem; color: #B8A5FF; font-family: var(--font-mono);">Open Source</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diagrama visual del flujo -->
+        <div class="reveal" style="display: flex; align-items: center; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; margin-bottom: var(--space-xl);">
+            <div style="text-align: center; flex: 0 0 auto;">
+                <div style="width: 80px; height: 80px; border-radius: var(--radius-lg); background: rgba(123,97,255,0.15); border: 1px solid rgba(123,97,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 0.5rem;">&#x1F4BB;</div>
+                <div style="font-family: var(--font-display); font-weight: 600; font-size: 0.85rem; color: white;">Tu Código</div>
+                <div style="font-size: 0.7rem; color: #B8A5FF;">Agent Framework SDK</div>
+            </div>
+            <div style="font-size: 1.5rem; color: var(--brand-secondary); flex: 0 0 auto;">&#x27A1;&#xFE0F;</div>
+            <div style="text-align: center; flex: 0 0 auto; position: relative;">
+                <div style="width: 140px; height: 80px; border-radius: var(--radius-lg); background: linear-gradient(135deg, var(--brand-primary), var(--brand-accent)); display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 0.5rem; box-shadow: 0 8px 30px rgba(0,120,212,0.3);">&#x2601;&#xFE0F;</div>
+                <div style="font-family: var(--font-display); font-weight: 600; font-size: 0.85rem; color: white;">Azure AI Foundry</div>
+                <div style="font-size: 0.7rem; color: var(--text-light);">Foundry Agents</div>
+            </div>
+            <div style="font-size: 1.5rem; color: var(--brand-secondary); flex: 0 0 auto;">&#x27A1;&#xFE0F;</div>
+            <div style="text-align: center; flex: 0 0 auto;">
+                <div style="width: 80px; height: 80px; border-radius: var(--radius-lg); background: rgba(0,120,212,0.15); border: 1px solid rgba(80,230,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 0.5rem;">&#x1F916;</div>
+                <div style="font-family: var(--font-display); font-weight: 600; font-size: 0.85rem; color: white;">Agente Activo</div>
+                <div style="font-size: 0.7rem; color: var(--text-light);">LLM + Tools</div>
+            </div>
+        </div>
+
+        <!-- Callout: En este taller -->
+        <div class="reveal" style="padding: var(--space-md) var(--space-lg); border-left: 3px solid var(--brand-secondary); background: rgba(80,230,255,0.05); border-radius: 0 var(--radius-md) var(--radius-md) 0; max-width: 900px;">
+            <p style="color: var(--brand-secondary); font-family: var(--font-display); font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">&#x1F3AF; En este taller</p>
+            <p style="color: var(--text-white-muted); font-size: 0.85rem; line-height: 1.6;">Usamos el SDK de <code style="background: rgba(0,120,212,0.15); padding: 0.1rem 0.4rem; border-radius: 4px; font-family: var(--font-mono); font-size: 0.78rem; color: var(--brand-secondary);">azure-ai-projects</code> para crear agentes directamente en <strong>Foundry Agents</strong>. El folder <code style="background: rgba(123,97,255,0.15); padding: 0.1rem 0.4rem; border-radius: 4px; font-family: var(--font-mono); font-size: 0.78rem; color: #B8A5FF;">agent-framework/</code> del repo muestra los mismos conceptos usando el <strong>Microsoft Agent Framework SDK</strong> con workflows, middleware y más control programático.</p>
+        </div>
+    </div>
+</section>
+
+<section class="section-bento" id="patron">
+    <div class="container">
+        <div class="section-badge badge-dark">&#x2699;&#xFE0F; Arquitectura</div>
+        <h2 class="reveal">El Patrón que se Repite en TODO</h2>
+        <p class="reveal" style="color: var(--text-light); max-width: 700px; margin-top: 0.5rem;">Los 9 labs siguen el mismo flujo de 4 pasos. El código crea y registra los agentes directamente en <strong style="color: var(--brand-secondary);">Azure AI Foundry</strong> (la nube) — no se ejecutan localmente.</p>
+        <div class="bento-grid stagger">
+            <div class="bento-item bento-item--code">
+                <div class="code-block"><span class="cm"># 1. CONECTAR</span>
+client = <span class="fn">AIProjectClient</span>(endpoint, credential)
+
+<span class="cm"># 2. CREAR AGENTE</span>
+agent = client.agents.<span class="fn">create_version</span>(
+  agent_name=<span class="str">"mi-agente"</span>,
+  definition=<span class="fn">PromptAgentDefinition</span>(
+    model=<span class="str">"gpt-4o"</span>,
+    instructions=<span class="str">"Eres un asesor..."</span>,
+    tools=[...]
+  )
+)
+
+<span class="cm"># 3. CONVERSAR</span>
+response = openai_client.responses.<span class="fn">create</span>(
+  conversation=conv.id,
+  input=<span class="str">"Mi pregunta"</span>,
+  extra_body={<span class="str">"agent"</span>: {...}}
+)
+
+<span class="cm"># 4. LIMPIAR</span>
+client.agents.<span class="fn">delete_version</span>(...)</div>
+            </div>
+            <div class="bento-item bento-item--step"><div class="bento-step-num">01</div><h4>Conectar</h4><p>Autenticarse con Azure y apuntar al proyecto en AI Foundry</p></div>
+            <div class="bento-item bento-item--step"><div class="bento-step-num">02</div><h4>Crear Agente</h4><p>Se registra en Foundry con instrucciones, modelo y tools</p></div>
+            <div class="bento-item bento-item--step"><div class="bento-step-num">03</div><h4>Conversar</h4><p>Crear conversación, enviar mensajes, obtener respuestas</p></div>
+            <div class="bento-item bento-item--step"><div class="bento-step-num">04</div><h4>Limpiar</h4><p>Borrar agentes y recursos para no generar costos</p></div>
+        </div>
+        <div class="reveal" style="margin-top: var(--space-lg); padding: var(--space-md) var(--space-lg); border-left: 3px solid var(--brand-secondary); background: rgba(80,230,255,0.05); border-radius: 0 var(--radius-md) var(--radius-md) 0;">
+            <p style="color: var(--brand-secondary); font-family: var(--font-display); font-weight: 600; font-size: 0.85rem; margin-bottom: 0.3rem;">&#x2601;&#xFE0F; ¿Dónde vive el agente?</p>
+            <p style="color: var(--text-white-muted); font-size: 0.85rem; line-height: 1.6;">El agente <strong>no se ejecuta en tu máquina</strong>. Cuando llamas <code style="background: rgba(0,120,212,0.15); padding: 0.1rem 0.4rem; border-radius: 4px; font-family: var(--font-mono); font-size: 0.78rem; color: var(--brand-secondary);">create_version()</code>, se crea y registra en <strong>Azure AI Foundry</strong>. El servicio en la nube hospeda el agente, conecta el modelo LLM, ejecuta las herramientas y maneja las conversaciones. Tu notebook solo envía instrucciones y recibe respuestas.</p>
+        </div>
+    </div>
+</section>
+
+<section class="section-stepper" id="labs">
+    <div class="container">
+        <div class="section-badge badge-light" style="text-align:center;display:block;">&#x1F5FA;&#xFE0F; Mapa del Taller</div>
+        <h2 class="reveal" style="text-align:center;">Los 9 Laboratorios</h2>
+        <p class="reveal" style="text-align:center; color: var(--text-secondary); max-width:600px; margin: 0.5rem auto 0;">Progresión de complejidad creciente — cada lab agrega una capacidad nueva.</p>
+    </div>
+    <div class="stepper-wrapper">
+        <div class="stepper stagger">
+            <div class="step"><div class="step-number step-number--blue">1</div><h4>Agente Básico</h4><p>Asesor financiero</p><div class="step-level">&#x2B50;</div></div>
+            <div class="step"><div class="step-number step-number--blue">2</div><h4>Code Interpreter</h4><p>Ejecuta Python</p><div class="step-level">&#x2B50;&#x2B50;</div></div>
+            <div class="step"><div class="step-number step-number--blue">3</div><h4>File Search</h4><p>Busca en docs (RAG)</p><div class="step-level">&#x2B50;&#x2B50;</div></div>
+            <div class="step"><div class="step-number step-number--teal">4</div><h4>Bing Grounding</h4><p>Búsqueda web viva</p><div class="step-level">&#x2B50;&#x2B50;</div></div>
+            <div class="step"><div class="step-number step-number--teal">5</div><h4>AI Search</h4><p>Búsqueda vectorial</p><div class="step-level">&#x2B50;&#x2B50;&#x2B50;</div></div>
+            <div class="step"><div class="step-number step-number--purple">6</div><h4>Multi-Agent</h4><p>Workflows YAML</p><div class="step-level">&#x2B50;&#x2B50;&#x2B50;&#x2B50;</div></div>
+            <div class="step"><div class="step-number step-number--teal">7</div><h4>MCP Tools</h4><p>Servicios externos</p><div class="step-level">&#x2B50;&#x2B50;&#x2B50;</div></div>
+            <div class="step"><div class="step-number step-number--purple">8</div><h4>Foundry IQ</h4><p>Multi-fuente smart</p><div class="step-level">&#x2B50;&#x2B50;&#x2B50;&#x2B50;&#x2B50;</div></div>
+            <div class="step"><div class="step-number step-number--green">9</div><h4>Memory</h4><p>Memoria persistente</p><div class="step-level">&#x2B50;&#x2B50;&#x2B50;&#x2B50;</div></div>
+        </div>
+    </div>
+</section>
+
+<section class="section-mega" id="fundamentos">
+    <div class="container">
+        <div class="mega-header"><div class="section-badge badge-dark">&#x1F4DA; Nivel 1</div><h2 class="reveal">Fundamentos: Labs 1–3</h2></div>
+        <div class="mega-numbers reveal stagger">
+            <div class="mega-stat"><div class="number">&#x1F4AC;</div><div class="label">Lab 1 — Básico</div><div class="desc">Tu primer agente: asesor financiero que responde sobre banca</div></div>
+            <div class="mega-stat"><div class="number">&#x1F40D;</div><div class="label">Lab 2 — Code</div><div class="desc">Escribe y ejecuta Python para cálculos financieros</div></div>
+            <div class="mega-stat"><div class="number">&#x1F4C4;</div><div class="label">Lab 3 — Docs</div><div class="desc">Busca en documentos internos con Vector Store y RAG</div></div>
+        </div>
+        <div class="labs-detail-grid reveal stagger">
+            <div class="lab-detail-card"><h4>Asesor Financiero</h4><p>Ciclo completo: conectar, crear agente con instrucciones, conversar y limpiar recursos.</p><span class="tool-tag">PromptAgentDefinition</span></div>
+            <div class="lab-detail-card"><h4>Calculadora de Préstamos</h4><p>Fórmula de amortización en sandbox seguro. Genera tablas y comparaciones.</p><span class="tool-tag">CodeInterpreterTool</span></div>
+            <div class="lab-detail-card"><h4>Búsqueda Documental</h4><p>Sube políticas a un Vector Store. Busca por significado semántico.</p><span class="tool-tag">FileSearchTool</span></div>
+        </div>
+    </div>
+</section>
+
+<section class="section-zigzag" id="busqueda">
+    <div class="container">
+        <div class="section-badge badge-light">&#x1F50D; Nivel 2</div>
+        <h2 class="reveal">Búsqueda Inteligente: Labs 4–5</h2>
+        <div class="zigzag-wrapper">
+            <div class="zigzag-item reveal">
+                <div class="zigzag-content">
+                    <h3>Lab 4: Bing Grounding</h3>
+                    <p>El agente busca en internet <strong>en tiempo real</strong> usando Bing. Ideal para tasas actuales, noticias y tendencias. Formula búsquedas, lee resultados y responde citando fuentes.</p>
+                    <div class="tag-row"><span class="tag tag--blue">BingGroundingTool</span><span class="tag tag--teal">Tiempo real</span><span class="tag tag--purple">Citaciones</span></div>
+                </div>
+                <div class="zigzag-visual zigzag-visual--bing"><div class="zigzag-visual-content"><div class="visual-icon">&#x1F310;</div><h4>Búsqueda Web</h4><p>Información actualizada de internet</p></div></div>
+            </div>
+            <div class="zigzag-item reveal">
+                <div class="zigzag-content">
+                    <h3>Lab 5: AI Search Vectorial</h3>
+                    <p>Índice con <strong>embeddings vectoriales</strong> de productos bancarios. Entiende "tarjeta barata" → encuentra "No-Fee Cash Back Card" por similitud semántica.</p>
+                    <div class="tag-row"><span class="tag tag--blue">AzureAISearchTool</span><span class="tag tag--teal">Embeddings</span><span class="tag tag--purple">HNSW</span></div>
+                </div>
+                <div class="zigzag-visual zigzag-visual--search"><div class="zigzag-visual-content"><div class="visual-icon">&#x1F50D;</div><h4>Búsqueda Semántica</h4><p>Encuentra por significado, no por palabras</p></div></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section-layers" id="orquestacion">
+    <div class="container">
+        <div class="section-badge badge-dark" style="text-align:center;display:block;">&#x26A1; Nivel 3</div>
+        <h2 class="reveal" style="text-align:center;">Orquestación: Labs 6–7</h2>
+        <p class="reveal" style="text-align:center; color: var(--text-light); max-width: 600px; margin: 0.5rem auto 0;">Múltiples agentes trabajando en equipo, conectados a servicios externos.</p>
+        <div class="layer-stack stagger">
+            <div class="layer"><span class="layer-icon">&#x1F4CB;</span><div class="layer-text"><h4>Reclamo del Cliente</h4><p>Input: descripción del siniestro + datos de póliza</p></div></div>
+            <div class="layer"><span class="layer-icon">&#x2705;</span><div class="layer-text"><h4>Agente de Validez</h4><p>¿El reclamo está cubierto por la póliza?</p></div></div>
+            <div class="layer"><span class="layer-icon">&#x1F3E2;</span><div class="layer-text"><h4>Agente de Departamento</h4><p>Auto, Hogar, Vida, Salud o Comercial</p></div></div>
+            <div class="layer"><span class="layer-icon">&#x1F4B0;</span><div class="layer-text"><h4>Agente de Estimación</h4><p>Estima rango de pago: bajo / medio / alto</p></div></div>
+            <div class="layer"><span class="layer-icon">&#x1F4CA;</span><div class="layer-text"><h4>Orquestador &#x2192; Reporte Final</h4><p>Sintetiza todo en reporte estructurado</p></div></div>
+        </div>
+        <div class="orchestration-info reveal stagger">
+            <div class="orch-card"><h4>Lab 6: Multi-Agent Workflows</h4><p>4 agentes especializados orquestados por un <strong>YAML declarativo</strong>. Streaming en tiempo real. Conversación compartida.</p></div>
+            <div class="orch-card"><h4>Lab 7: MCP Tools</h4><p>Agente conectado al <strong>Foundry MCP Server</strong> (mcp.ai.azure.com). Explora modelos, deployments y evaluaciones vía protocolo estándar.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="section-dashboard" id="maestria">
+    <div class="container">
+        <div class="section-badge badge-light" style="text-align:center;display:block;">&#x1F3C6; Nivel 4</div>
+        <h2 class="reveal" style="text-align:center;">Maestría: Labs 8–9</h2>
+        <p class="reveal" style="text-align:center; color: var(--text-secondary); max-width: 600px; margin: 0.5rem auto 0;">Las capacidades más avanzadas: conocimiento distribuido y personalización con memoria.</p>
+        <div class="dashboard-grid stagger">
+            <div class="dash-cell dash-cell--highlight"><div class="cell-icon">&#x1F9E0;</div><h4>Lab 8: Foundry IQ</h4><p>Agente de fraude con <strong>3 fuentes de conocimiento</strong>. Foundry IQ enruta automáticamente cada consulta a la fuente correcta.</p></div>
+            <div class="dash-cell dash-cell--accent"><div class="cell-icon">&#x1F4CA;</div><h4>3 Fuentes</h4><p>Fraud Patterns, Regulatory Compliance, Investigation Procedures</p></div>
+            <div class="dash-cell"><div class="cell-icon">&#x1F517;</div><h4>Enrutamiento Inteligente</h4><p>No necesitas especificar dónde buscar — Foundry IQ decide automáticamente</p></div>
+            <div class="dash-cell"><div class="cell-icon">&#x1F4AC;</div><h4>Memoria Persistente</h4><p>El agente recuerda preferencias entre sesiones</p><div class="mini-bars"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div></div>
+            <div class="dash-cell dash-cell--highlight"><div class="cell-icon">&#x1F3E6;</div><h4>Lab 9: Memory Search</h4><p>Asesor bancario que almacena preferencias. En la <strong>sesión 2</strong>, ya sabe tu tolerancia al riesgo y metas — sin que lo repitas.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-final">
+    <div class="hero-content reveal">
+        <h2>¿Listos para Construir?</h2>
+        <p>9 labs. 6 herramientas. 4 niveles. Un toolkit completo para aplicaciones de IA empresariales con Microsoft Foundry.</p>
+        <div class="cta-buttons">
+            <a href="#inicio" class="cta-button cta-button--primary">&#x2191; Volver al Inicio</a>
+            <a href="GUIA-TALLER-AGENTES-IA.md" class="cta-button cta-button--secondary">&#x1F4D6; Leer la Guía</a>
+        </div>
+        <div class="cta-tech-stack stagger">
+            <div class="cta-tech"><span class="icon">&#x2601;&#xFE0F;</span>Azure AI Foundry</div>
+            <div class="cta-tech"><span class="icon">&#x1F40D;</span>Python SDK</div>
+            <div class="cta-tech"><span class="icon">&#x1F50D;</span>AI Search</div>
+            <div class="cta-tech"><span class="icon">&#x1F50C;</span>MCP Protocol</div>
+            <div class="cta-tech"><span class="icon">&#x1F9E0;</span>Foundry IQ</div>
+            <div class="cta-tech"><span class="icon">&#x1F4BE;</span>Memory Store</div>
+        </div>
+    </div>
+</section>
+
+<script>
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+document.querySelectorAll('.reveal, .stagger').forEach(el => observer.observe(el));
+
+window.addEventListener('scroll', () => {
+    document.querySelector('nav').classList.toggle('scrolled', window.scrollY > 50);
+}, { passive: true });
+
+function animateCounters() {
+    document.querySelectorAll('[data-count]').forEach(el => {
+        const target = parseInt(el.dataset.count), duration = 1800, start = performance.now();
+        function update(now) {
+            const p = Math.min((now - start) / duration, 1);
+            el.textContent = Math.floor(target * (1 - Math.pow(1 - p, 3)));
+            if (p < 1) requestAnimationFrame(update);
+        }
+        requestAnimationFrame(update);
+    });
+}
+const cObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { animateCounters(); cObs.disconnect(); } });
+}, { threshold: 0.5 });
+const hs = document.querySelector('.hero-stats');
+if (hs) cObs.observe(hs);
+
+document.addEventListener('keydown', (e) => {
+    const s = document.querySelectorAll('section');
+    const c = [...s].findIndex(x => { const r = x.getBoundingClientRect(); return r.top >= -100 && r.top <= window.innerHeight / 2; });
+    if (e.key === 'ArrowDown' || e.key === 'PageDown') { e.preventDefault(); s[Math.min(c + 1, s.length - 1)]?.scrollIntoView({ behavior: 'smooth' }); }
+    if (e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); s[Math.max(c - 1, 0)]?.scrollIntoView({ behavior: 'smooth' }); }
+});
+</script>
+</body>
+</html>
